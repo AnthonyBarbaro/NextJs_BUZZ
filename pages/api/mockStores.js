@@ -1,6 +1,6 @@
 // mockStores.js
 export const mockStores = [
-    { id: 1, name: 'Mission Valley' },
-    { id: 2, name: 'La Mesa' },
+    { id: 1, name: 'Carlsbad' },
+    { id: 2, name: 'Oceanside' },
     //{ id: 3, name: 'Lemon Grove' },
 ];

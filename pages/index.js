@@ -1,54 +1,39 @@
 import { useState, useEffect } from 'react';
-import { fetchProducts, fetchStores } from '../lib/api'; // Assuming mock or real API for products
+import { fetchProducts, fetchBrands } from '../lib/api'; // Assuming you fetch products and brands from Dutchie
 import Navbar from '../components/Navbar';
-import Banner from '../components/Banner';
-import AgeVerification from '../components/AgeVerification';
+import Filter from '../components/Filter';
 import ProductCard from '../components/ProductCard';
-import StoreSwitcher from '../components/StoreSwitcher';
+import AgeVerification from '../components/AgeVerification';
 
 const Home = () => {
     const [verified, setVerified] = useState(false);
     const [selectedStore, setSelectedStore] = useState('');
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
-    const [showStoreSwitcher, setShowStoreSwitcher] = useState(false);
-    const [stores, setStores] = useState([]);
+    const [brands, setBrands] = useState([]);
 
     useEffect(() => {
-        const loadStores = async () => {
-            const storesData = await fetchStores();
-            setStores(storesData);
-            if (!selectedStore && storesData.length > 0) {
-                setSelectedStore(storesData[0].name); // Default to first store
-            }
-        };
-        loadStores();
-    }, []);
-
-    useEffect(() => {
-        const loadProducts = async () => {
-            const productData = await fetchProducts();
+        const loadProductsAndBrands = async () => {
+            const productData = await fetchProducts(); // Fetch Dutchie products
+            const brandData = await fetchBrands(); // Fetch Dutchie brands
             setProducts(productData);
-            setFilteredProducts(productData); // Initialize filteredProducts to all products
+            setFilteredProducts(productData); // Initialize with all products
+            setBrands(brandData); // Load brands
         };
-        loadProducts();
+        loadProductsAndBrands();
     }, [selectedStore]);
+
+    const handleStoreChange = (store) => {
+        setSelectedStore(store); // Update the selected store when user switches
+    };
+
+    const handleFilter = (filtered) => {
+        setFilteredProducts(filtered); // Update filtered products based on the filter
+    };
 
     const handleVerification = (store) => {
         setSelectedStore(store);
         setVerified(true);
-    };
-
-    const handleSearch = (searchResults) => {
-        setFilteredProducts(searchResults); // Update filteredProducts with search results
-    };
-
-    const handleStoreChange = (store) => {
-        if (store === 'show-list') {
-            setShowStoreSwitcher(true); // Show store switcher modal
-        } else {
-            setSelectedStore(store);
-        }
     };
 
     return (
@@ -57,21 +42,19 @@ const Home = () => {
             {verified && (
                 <>
                     <Navbar
-                        selectedStore={selectedStore}
-                        products={products} // Pass the products array to the Navbar
-                        onStoreChange={handleStoreChange}
-                        onSearch={handleSearch} // Pass the search handler
+                      selectedStore={selectedStore}
+                      onStoreChange={handleStoreChange}  // Pass the store change function
+                      onSearch={() => {}}  // Add search functionality later
+                      products={products}
                     />
-                    <Banner />
-                    {showStoreSwitcher && (
-                        <StoreSwitcher
-                            stores={stores}
-                            onStoreChange={handleStoreChange}
-                            onClose={() => setShowStoreSwitcher(false)}
-                        />
-                    )}
-                    <div className="container mx-auto my-10">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="flex justify-between px-6 py-4">
+                        {/* Filter Section (1/4 of the screen) */}
+                        <div className="w-1/4">
+                            <Filter products={products} onFilter={handleFilter} brands={brands} />
+                        </div>
+
+                        {/* Product Display Section (3/4 of the screen) */}
+                        <div className="w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredProducts.map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}
